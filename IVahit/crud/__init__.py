@@ -108,5 +108,53 @@ class Crud:
                 ),
             )
 
+
+
             
 
+    def UpdateNote(self, note_id: int, new_text: str | None = None, new_tags: list[str] | None = None) -> FullNoteDef | None:
+        logger.debug("Update note {note_id}")
+        with Session(self._engine) as session:
+            note = session.get(Note, note_id)
+            if not note:
+                logger.debug("Note not found for update")
+                return None
+
+            if new_text:
+                note.note = new_text
+            if new_tags is not None:
+                for old_tag in note.tags:
+                    session.delete(old_tag)
+                for tag_text in new_tags:
+                    tag = Tag(tag=tag_text, note=note)
+                    session.add(tag)
+
+            session.commit()
+            logger.debug("Note updated")
+
+            return FullNoteDef(
+                id=note.id,
+                note=note.note,
+                tags=[
+                    FullTagDef(id=t.id, note_id=t.note_id, tag=t.tag)
+                    for t in note.tags
+                ],
+            )
+
+
+    def DeleteNote(self, note_id: int) -> bool:
+        logger.debug("Delete note {note_id}")
+        with Session(self._engine) as session:
+            note = session.get(Note, note_id)
+            if not note:
+                logger.debug("Note not found for deletion")
+                return False
+
+            session.delete(note)
+            session.commit()
+            logger.debug("Note deleted")
+            return True
+
+            
+
+ 
