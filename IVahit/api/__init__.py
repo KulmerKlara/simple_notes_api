@@ -44,7 +44,28 @@ async def create_note(note: CreateNoteDef) -> FullNoteDef:
         raise e
 
 
-@app.put(path="/note/{note_id}")
+
+
+@app.put(path="/note/{note_id}", response_model=FullNoteDef)
 async def update_note(note_id: UUID, note: CreateNoteDef):
-    assert note_id
-    assert note
+    try:
+        crud = Crud(get_prod_endinge())
+        updated_note = crud.UpdateNote(note_id, note.note, [t.tag for t in note.tags])  # pyright: ignore[reportArgumentType]
+        if not updated_note:
+            raise HTTPException(status_code=404, detail=f"No note found with id {note_id}")
+        return updated_note
+    except Exception as e:
+        logger.error(f"Error updating note {note_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete(path="/note/{note_id}")
+async def delete_note(note_id: UUID):
+    try:
+        crud = Crud(get_prod_endinge())
+        deleted = crud.DeleteNote(note_id)
+        if not deleted:
+            raise HTTPException(status_code=404, detail=f"No note found with id {note_id}")
+        return {"message": f"Note {note_id} deleted successfully"}
+    except Exception as e:
+        logger.error(f"Error deleting note {note_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
