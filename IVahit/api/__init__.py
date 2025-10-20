@@ -46,6 +46,9 @@ async def create_note(note: CreateNoteDef) -> FullNoteDef:
 
 
 
+
+
+
 @app.put(path="/note/{note_id}", response_model=FullNoteDef)
 async def update_note(note_id: UUID, note: CreateNoteDef):
     try:
@@ -69,3 +72,4 @@ async def delete_note(note_id: UUID):
     except Exception as e:
         logger.error(f"Error deleting note {note_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
