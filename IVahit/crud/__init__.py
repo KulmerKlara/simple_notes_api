@@ -140,21 +140,16 @@ class Crud:
                     for t in note.tags
                 ],
             )
+        
 
-
-    def DeleteNote(self, note_id: int) -> bool:
-        logger.debug("Delete note {note_id}")
+    def DeleteNote(self, note_id: UUID) -> bool:
+        logger.debug(f"Delete note {note_id}")
         with Session(self._engine) as session:
             note = session.get(Note, note_id)
             if not note:
                 logger.debug("Note not found for deletion")
                 return False
-
             session.delete(note)
             session.commit()
             logger.debug("Note deleted")
             return True
-
-            
-
- 
